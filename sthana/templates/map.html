@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Map · {{ app_name }}{% endblock %}
+
+{% block content %}
+<header class="container-wide page-head">
+  <div>
+    <p class="eyebrow">Map</p>
+    <h1 class="page-title">Library map.</h1>
+    <p class="page-sub">Every seat, where it is. How busy each area is, and how that changes through the day.</p>
+  </div>
+  <div class="clock">
+    <div class="live-tag"><span class="live-dot" aria-hidden="true"></span><span id="m-floor">{{ floor_name }}</span></div>
+    <div id="m-clock" class="clock-time">--:--</div>
+  </div>
+</header>
+
+<!-- ================= LIVE MAP ================= -->
+<section class="container-wide map-layout" aria-labelledby="live-map-title">
+  <div class="card map-card">
+    <div class="card-head">
+      <h2 id="live-map-title" class="card-title">Live map</h2>
+      <div class="segmented" role="group" aria-label="Map view" id="m-mode">
+        <button type="button" data-mode="status" aria-pressed="true">Status</button>
+        <button type="button" data-mode="heat" aria-pressed="false">Heat</button>
+        <button type="button" data-mode="graph" aria-pressed="false">Graph</button>
+      </div>
+    </div>
+
+    <div class="map-stage" id="m-stage">
+      <div class="map-room">
+        <p class="map-label"><span>Library</span> · <span id="m-floor-2">{{ floor_name }}</span></p>
+        <div class="map-canvas-wrap">
+          <canvas class="heat-canvas" id="m-heat" aria-hidden="true"></canvas>
+          <svg class="graph-svg" id="m-graph" aria-hidden="true"></svg>
+          <div class="seat-grid" id="m-grid" role="group" aria-label="Seats, arranged as seen by the camera"></div>
+        </div>
+        <p class="map-front" aria-hidden="true">Camera</p>
+      </div>
+      <div class="empty" id="m-empty" hidden>
+        <h3>No seats yet.</h3>
+        <p>Analyze a frame on the Live page and the map builds itself from the detected desks.</p>
+        <a class="btn btn-primary" href="{{ url_for('monitor') }}">Open Live Monitor</a>
+      </div>
+    </div>
+
+    <div class="map-legend" id="m-legend"></div>
+  </div>
+
+  <aside class="side" aria-label="Seat recommendation and details">
+    <div class="card reco-card" id="m-reco">
+      <p class="eyebrow">Best seat now</p>
+      <p class="reco-id" id="m-reco-id">–</p>
+      <p class="meta" id="m-reco-why">Waiting for seats.</p>
+      <div class="chips" id="m-reco-alt"></div>
+    </div>
+    <div class="card seat-detail" id="m-detail" aria-live="polite">
+      <p class="meta">Select a seat to see its details, neighbours and what the spatial model thinks.</p>
+    </div>
+  </aside>
+</section>
+
+<!-- ================= ZONES ================= -->
+<section class="container-wide section-gap" aria-labelledby="zones-title">
+  <h2 id="zones-title" class="section-title">Zones.</h2>
+  <p class="page-sub">Occupancy right now: seats taken or held by belongings, per area.</p>
+  <div class="zone-grid" id="m-zones"></div>
+</section>
+
+<!-- ================= OVER TIME ================= -->
+<section class="container-wide section-gap" aria-labelledby="time-title">
+  <div class="toolbar">
+    <div>
+      <h2 id="time-title" class="section-title">Through the day.</h2>
+      <p class="page-sub">How occupancy moved from morning to evening.</p>
+    </div>
+    <div class="time-tools">
+      <select id="t-day" class="select select-sm" aria-label="Day"></select>
+      <div class="segmented" role="group" aria-label="Time bucket" id="t-bucket">
+        <button type="button" data-min="15" aria-pressed="false">15 min</button>
+        <button type="button" data-min="30" aria-pressed="false">30 min</button>
+        <button type="button" data-min="60" aria-pressed="false">1 hour</button>
+      </div>
+    </div>
+  </div>
+  <p class="sim-note" id="t-sim" hidden>Includes simulated data (source "SIMULATED demo day"). Remove it with <span class="mono">python simulate_day.py --remove</span>.</p>
+
+  <div class="card time-card" id="t-card">
+    <div class="player">
+      <button class="play-btn" id="t-play" type="button" aria-label="Play time-lapse">
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>
+      </button>
+      <div class="player-time">
+        <span class="player-clock" id="t-now">--:--</span>
+        <span class="meta" id="t-now-meta"></span>
+      </div>
+      <input type="range" id="t-slider" min="0" max="0" value="0" step="1" aria-label="Time of day">
+    </div>
+    <div class="time-grid">
+      <div>
+        <h3 class="card-title small-title">Seats at <span id="t-now-2">--:--</span></h3>
+        <div class="replay-room"><div class="seat-grid replay" id="t-grid" role="group" aria-label="Seat occupancy at the selected time"></div></div>
+      </div>
+      <div>
+        <h3 class="card-title small-title">Occupancy through the day</h3>
+        <div class="line-chart" id="t-chart"></div>
+      </div>
+    </div>
+    <div class="empty" id="t-empty" hidden>
+      <h3>No history for a time-lapse yet.</h3>
+      <p>Play a video with <b>Recording starts at</b> set, analyze images after <b>Set clock</b> (Live → Demo controls),<br>or run <span class="mono">python simulate_day.py</span> for a clearly labelled demo day.</p>
+    </div>
+  </div>
+
+  <div class="card matrix-card" id="t-zone-card">
+    <div class="card-head"><h3 class="card-title">Zones by hour</h3><span class="meta">Share of seats taken or held</span></div>
+    <div class="matrix-wrap"><div class="matrix" id="t-zone-matrix" role="table" aria-label="Zone occupancy by time"></div></div>
+  </div>
+  <div class="card matrix-card" id="t-seat-card">
+    <div class="card-head"><h3 class="card-title">Every seat, every hour</h3><span class="meta">Hover a cell for details</span></div>
+    <div class="matrix-wrap tall"><div class="matrix" id="t-seat-matrix" role="table" aria-label="Seat occupancy by time"></div></div>
+  </div>
+  <div class="heat-scale-row" id="t-scale"></div>
+</section>
+
+<!-- ================= SPATIAL REASONING ================= -->
+<section class="container-wide section-gap" aria-labelledby="gnn-title">
+  <h2 id="gnn-title" class="section-title">Spatial reasoning.</h2>
+  <p class="page-sub">Each seat is a node. Neighbouring seats are joined by edges. A graph neural network passes messages along them to refine every seat's estimate.</p>
+  <div class="gnn-grid">
+    <div class="card gnn-explain">
+      <ol class="gnn-steps">
+        <li><b>Nodes.</b> Every tracked seat, with the detector's observation and how confident it was.</li>
+        <li><b>Edges.</b> Each seat links to its nearest seats, measured in desk sizes so camera perspective doesn't distort distance.</li>
+        <li><b>Messages.</b> Two rounds of message passing blend each seat's own evidence and history with its neighbours'. Busy areas cluster.</li>
+        <li><b>Gated by confidence.</b> A clear detection barely moves. An uncertain or hidden seat leans on context, so a person walking past a camera doesn't blank out a desk.</li>
+      </ol>
+      <p class="meta">Uses: occluded seats stay on the map as <i>inferred</i>, weak detections are flagged <i>uncertain</i>, and the best-seat pick favours quiet neighbourhoods. It never overrides a confident detection.</p>
+    </div>
+    <div class="gnn-stats" id="g-stats"></div>
+  </div>
+  <div class="card flag-card">
+    <div class="card-head"><h3 class="card-title">Seats the model is watching</h3><span class="meta">Uncertain, inferred or disagreeing</span></div>
+    <div class="flag-list" id="g-flags"></div>
+  </div>
+</section>
+
+<div class="viz-tip" id="viz-tip" role="tooltip" hidden></div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.MAP_DEFAULT_BUCKET = {{ bucket_minutes | int }};</script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

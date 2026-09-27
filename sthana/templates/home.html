@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} · {{ tagline }}{% endblock %}
+
+{% block content %}
+<!-- ================= HERO ================= -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="container hero-copy">
+    <p class="eyebrow" data-reveal><span lang="sa">{{ app_name_native }}</span> · a place, a seat</p>
+    <h1 id="hero-title" class="display" data-reveal style="--d:1">Every seat.<br><span class="gradient-text">Seen.</span></h1>
+    <p class="lead hero-lead" data-reveal style="--d:2">Know which library desks are free, taken, or just holding a bag. In real time.</p>
+    <div class="hero-ctas" data-reveal style="--d:3">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('monitor') }}">Open Live Monitor</a>
+      <a class="link-more" href="#how">See how it works</a>
+    </div>
+  </div>
+
+  <!-- Product shot: an illustrated floor plan that behaves like the real thing -->
+  <div class="container">
+    <figure class="hero-shot" data-reveal="scale" style="--d:3" id="hero-shot">
+      <svg class="floorplan" viewBox="0 0 720 440" role="img"
+           aria-labelledby="fp-title fp-desc">
+        <title id="fp-title">Library floor plan</title>
+        <desc id="fp-desc">Twelve desks. Green desks are free, red desks are taken, orange desks hold belongings. One orange desk turns green when its {{ grace_minutes }}-minute timer runs out.</desc>
+        <rect class="fp-room" x="8" y="8" width="704" height="424" rx="30"/>
+        <rect class="fp-win" x="60" y="6" width="170" height="5" rx="2.5"/>
+        <rect class="fp-win" x="275" y="6" width="170" height="5" rx="2.5"/>
+        <rect class="fp-win" x="490" y="6" width="170" height="5" rx="2.5"/>
+
+        {# seat states laid out row by row #}
+        {% set layout = [
+          ['busy','free','away','free'],
+          ['free','anim','busy','free'],
+          ['busy','free','free','away'],
+        ] %}
+        {% for row in layout %}{% set r = loop.index0 %}
+          {% for s in row %}{% set x = 60 + loop.index0 * 162 %}{% set y = 56 + r * 130 %}
+          <g class="seat s-{{ s }}">
+            <rect class="desk" x="{{ x }}" y="{{ y }}" width="112" height="58" rx="12"/>
+            {% if s in ['away', 'anim'] %}
+              <rect class="item" x="{{ x + 14 }}" y="{{ y + 18 }}" width="30" height="22" rx="4"/>
+              <rect class="item" x="{{ x + 52 }}" y="{{ y + 24 }}" width="22" height="16" rx="3"/>
+            {% endif %}
+            <circle class="chair" cx="{{ x + 56 }}" cy="{{ y + 84 }}" r="15"/>
+            {% if s == 'busy' %}<circle class="person" cx="{{ x + 56 }}" cy="{{ y + 84 }}" r="9"/>{% endif %}
+            <circle class="status" cx="{{ x + 97 }}" cy="{{ y + 15 }}" r="5"/>
+            {% if s == 'anim' %}
+              <circle class="ring" cx="{{ x + 97 }}" cy="{{ y + 15 }}" r="10"/>
+              <g class="bubble" transform="translate({{ x + 56 }} {{ y - 18 }})">
+                <rect x="-66" y="-17" width="132" height="30" rx="15"/>
+                <text class="b-away" x="0" y="3">Away · 29:59</text>
+                <text class="b-free" x="0" y="3">Free now</text>
+              </g>
+            {% endif %}
+          </g>
+          {% endfor %}
+        {% endfor %}
+      </svg>
+      <figcaption class="legend">
+        <span><i class="dot ok"></i>Available</span>
+        <span><i class="dot warn"></i>Belongings only</span>
+        <span><i class="dot bad"></i>Occupied</span>
+        <span><i class="dot reclaim"></i>Free after {{ grace_minutes }} min</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= RIGHT NOW (live numbers) ================= -->
+<section class="now" aria-labelledby="now-title">
+  <div class="container">
+    <h2 id="now-title" class="headline" data-reveal>Right now.</h2>
+    <div class="now-grid" aria-live="polite">
+      <div class="now-stat" data-reveal style="--d:1"><span class="now-num ok" id="now-free">–</span><span class="now-label">free</span></div>
+      <div class="now-stat" data-reveal style="--d:2"><span class="now-num warn" id="now-away">–</span><span class="now-label">held by belongings</span></div>
+      <div class="now-stat" data-reveal style="--d:3"><span class="now-num bad" id="now-busy">–</span><span class="now-label">occupied</span></div>
+    </div>
+    <p class="now-foot" data-reveal style="--d:4"><span id="now-updated">Waiting for the first frame.</span> <a class="link-more small" href="{{ url_for('monitor') }}">Open live monitor</a></p>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how" class="how" aria-labelledby="how-title">
+  <div class="container">
+    <p class="eyebrow" data-reveal>How it works</p>
+    <h2 id="how-title" class="headline" data-reveal style="--d:1">Three models.<br>One glance.</h2>
+    <ol class="steps">
+      <li class="step card" data-reveal style="--d:1">
+        <span class="step-num">01</span>
+        <svg class="step-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="14" width="36" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M4 10v-2a4 4 0 0 1 4-4h2M38 4h2a4 4 0 0 1 4 4v2M44 38v2a4 4 0 0 1-4 4h-2M10 44H8a4 4 0 0 1-4-4v-2" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <h3>Find every desk.</h3>
+        <p>A custom YOLO model outlines each desk in the frame.</p>
+      </li>
+      <li class="step card" data-reveal style="--d:2">
+        <span class="step-num">02</span>
+        <svg class="step-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="15" r="7" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M10 42c1.5-8 7-12 14-12s12.5 4 14 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="38" cy="10" r="5" fill="var(--bad)"/></svg>
+        <h3>See who's there.</h3>
+        <p>A person detector checks every seat. Someone sitting? Red.</p>
+      </li>
+      <li class="step card" data-reveal style="--d:3">
+        <span class="step-num">03</span>
+        <svg class="step-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="20" width="16" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M11 20v-3a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="27" y="26" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="38" cy="10" r="5" fill="var(--warn)"/></svg>
+        <h3>Read the desk.</h3>
+        <p>Nobody there? The desk is cropped and scanned for bags, books and laptops.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= THE 30-MINUTE RULE (scroll-driven) ================= -->
+<section id="rule" class="rule" aria-labelledby="rule-title">
+  <div class="rule-track" id="rule-track">
+    <div class="rule-sticky">
+      <div class="container rule-inner">
+        <p class="eyebrow">The {{ grace_minutes }}-minute rule</p>
+        <h2 id="rule-title" class="headline">Away isn't gone.</h2>
+        <p class="lead rule-lead">Belongings hold a seat for {{ grace_minutes }} minutes. After that, it's fair game. Keep things aside and sit.</p>
+        <div class="timeline" id="timeline" data-grace="{{ grace_minutes }}">
+          <div class="timeline-bar"><span class="timeline-fill"></span><span class="timeline-knob"></span></div>
+          <div class="timeline-ticks" aria-hidden="true"><span>0 min</span><span>{{ (grace_minutes / 2) | round | int }}</span><span>{{ grace_minutes }} min</span></div>
+          <p class="timeline-status" aria-live="polite">
+            <span class="ts-away"><i class="dot warn"></i> Belongings on desk · <b id="rule-min">0</b> min</span>
+            <span class="ts-free"><i class="dot ok"></i> Seat available. Keep things aside.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES (bento) ================= -->
+<section id="features" class="features" aria-labelledby="features-title">
+  <div class="container">
+    <p class="eyebrow" data-reveal>Features</p>
+    <h2 id="features-title" class="headline" data-reveal style="--d:1">Everything in one place.</h2>
+
+    <div class="bento">
+      <a class="tile tile-live" href="{{ url_for('monitor') }}" data-reveal>
+        <p class="tile-eyebrow">Live</p>
+        <h3>Every seat,<br>colour-coded.</h3>
+        <p class="tile-text">Updated every second. Timers count down on screen.</p>
+        <div class="mini-seats" aria-hidden="true">
+          {% for c in ['ok','bad','warn','ok','ok','bad','ok','reclaim','bad','ok','warn','ok'] %}<span class="mini {{ c }}"></span>{% endfor %}
+        </div>
+        <span class="link-more small">Open live monitor</span>
+      </a>
+      <div class="tile tile-video" data-reveal style="--d:1">
+        <svg class="tile-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="10" width="40" height="28" rx="7" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M20 18v12l10-6z" fill="var(--accent)"/></svg>
+        <h3>Video in.<br>Answers out.</h3>
+        <p class="tile-text">Upload a recording or connect a camera. Timers follow video time.</p>
+      </div>
+      <a class="tile tile-history" href="{{ url_for('history') }}" data-reveal style="--d:2">
+        <svg class="tile-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="36" height="32" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="12" y="15" width="10" height="8" rx="2" fill="var(--ok)"/><rect x="26" y="15" width="10" height="8" rx="2" fill="var(--warn)"/><rect x="12" y="27" width="10" height="8" rx="2" fill="var(--bad)"/><rect x="26" y="27" width="10" height="8" rx="2" fill="currentColor" opacity=".3"/></svg>
+        <h3>Nothing forgotten.</h3>
+        <p class="tile-text">Every frame, desk crop and detection. Saved.</p>
+        <span class="link-more small">History</span>
+      </a>
+      <a class="tile tile-records" href="{{ url_for('records') }}" data-reveal style="--d:3">
+        <svg class="tile-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="36" height="32" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M6 18h36M6 29h36M19 8v32" stroke="currentColor" stroke-width="2.5"/></svg>
+        <h3>Plain CSV.</h3>
+        <p class="tile-text">Filter, search, download.</p>
+        <span class="link-more small">Records</span>
+      </a>
+      <div class="tile tile-models" data-reveal style="--d:1">
+        <h3>Three models.<br>One pipeline.</h3>
+        <div class="model-flow" aria-label="Desk detector, then person detector, then object detector">
+          <span>Desks</span><i aria-hidden="true">→</i><span>People</span><i aria-hidden="true">→</i><span>Belongings</span>
+        </div>
+      </div>
+      <div class="tile tile-demo" data-reveal style="--d:2">
+        <p class="tile-big">29:00</p>
+        <h3>Demo in a minute.</h3>
+        <p class="tile-text">Set a seat's timer. Watch it turn green.</p>
+      </div>
+      <div class="tile tile-local" data-reveal style="--d:3">
+        <svg class="tile-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="21" width="28" height="21" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 21v-5a8 8 0 0 1 16 0v5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="31" r="3" fill="var(--accent)"/></svg>
+        <h3>Private by design.</h3>
+        <p class="tile-text">Runs on your machine. Nothing leaves it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LATEST CAPTURE (hidden until a run exists) ================= -->
+<section class="latest" id="latest" aria-labelledby="latest-title" hidden>
+  <div class="container">
+    <p class="eyebrow" data-reveal>From your library</p>
+    <h2 id="latest-title" class="headline" data-reveal style="--d:1">Latest capture.</h2>
+    <a class="latest-card" id="latest-link" href="{{ url_for('history') }}" data-reveal="scale" style="--d:2">
+      <img id="latest-img" alt="" loading="lazy" decoding="async" width="1600" height="1200">
+      <div class="latest-meta">
+        <div><p class="latest-source" id="latest-source"></p><p class="meta" id="latest-time"></p></div>
+        <div class="chips" id="latest-chips"></div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="cta" aria-labelledby="cta-title">
+  <div class="container">
+    <h2 id="cta-title" class="display cta-title" data-reveal>Find a seat.<br><span class="muted">Not a search.</span></h2>
+    <div class="hero-ctas" data-reveal style="--d:1">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('monitor') }}">Open Live Monitor</a>
+      <a class="link-more" href="{{ url_for('history') }}">Browse history</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}

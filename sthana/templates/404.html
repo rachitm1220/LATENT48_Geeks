@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Not found · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="container not-found">
+  <p class="eyebrow">404</p>
+  <h1 class="display">This seat<br><span class="muted">doesn't exist.</span></h1>
+  <p class="lead">The page or run you're looking for isn't here.</p>
+  <div class="hero-ctas"><a class="btn btn-primary btn-lg" href="{{ url_for('home') }}">Back to overview</a><a class="link-more" href="{{ url_for('history') }}">History</a></div>
+</section>
+{% endblock %}

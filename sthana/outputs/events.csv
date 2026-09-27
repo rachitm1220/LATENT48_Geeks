@@ -1,0 +1,31 @@
+timestamp,seat_clock,desk_id,state,text
+2026-09-27T16:17:43,16:17:43,,,System reset
+2026-09-27T16:17:46,16:17:46,D01,,D01 registered
+2026-09-27T16:17:46,16:17:46,D02,,D02 registered
+2026-09-27T16:17:46,16:17:46,D03,,D03 registered
+2026-09-27T16:17:46,16:17:46,D04,,D04 registered
+2026-09-27T16:17:46,16:17:46,D05,,D05 registered
+2026-09-27T16:17:46,16:17:46,D01,PARTIALLY_OCCUPIED,"D01: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:46,16:17:46,D02,PARTIALLY_OCCUPIED,"D02: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:46,16:17:46,D03,PARTIALLY_OCCUPIED,"D03: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:46,16:17:46,D04,PARTIALLY_OCCUPIED,"D04: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:46,16:17:46,D05,OCCUPIED,D05: person seated.
+2026-09-27T16:17:47,16:17:47,D06,,D06 registered
+2026-09-27T16:17:47,16:17:47,D06,PARTIALLY_OCCUPIED,"D06: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:49,16:17:50,D06,OCCUPIED,D06: person seated.
+2026-09-27T16:17:53,16:17:54,D03,OCCUPIED,D03: person seated.
+2026-09-27T16:17:53,16:17:54,D06,PARTIALLY_OCCUPIED,"D06: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:55,16:17:56,D02,AVAILABLE,D02: seat is empty and available.
+2026-09-27T16:17:55,16:17:56,D03,PARTIALLY_OCCUPIED,"D03: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:57,16:17:58,D07,,D07 registered
+2026-09-27T16:17:57,16:17:58,D02,PARTIALLY_OCCUPIED,"D02: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:17:57,16:17:58,D07,PARTIALLY_OCCUPIED,"D07: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:18:01,16:18:02,D01,OCCUPIED,D01: person seated.
+2026-09-27T16:18:07,16:18:08,D01,PARTIALLY_OCCUPIED,"D01: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:18:09,16:18:11,D01,AVAILABLE,D01: seat is empty and available.
+2026-09-27T16:18:09,16:18:11,D06,OCCUPIED,D06: person seated.
+2026-09-27T16:18:11,16:18:13,D08,,D08 registered
+2026-09-27T16:18:11,16:18:13,D01,PARTIALLY_OCCUPIED,"D01: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:18:11,16:18:13,D08,PARTIALLY_OCCUPIED,"D08: belongings only, owner away. Timer started (30 min)."
+2026-09-27T16:18:27,16:18:30,D01,,Demo: D01 timer set to 28 min elapsed
+2026-09-27T16:20:32,16:20:35,D01,RECLAIMABLE,D01: belongings unattended for 30 min. This seat can be occupied now by keeping the things aside.

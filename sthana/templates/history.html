@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}History · {{ app_name }}{% endblock %}
+
+{% block content %}
+<header class="container-wide page-head">
+  <div>
+    <p class="eyebrow">History</p>
+    <h1 class="page-title">Every frame, kept.</h1>
+    <p class="page-sub">Annotated frames, desk crops and detections from every analysis.</p>
+  </div>
+</header>
+
+<section class="container-wide" aria-label="History summary">
+  <div class="stat-row" id="history-stats">
+    <div class="stat-tile"><span class="stat-num" id="st-saved">–</span><span class="stat-label">Saved runs</span></div>
+    <div class="stat-tile"><span class="stat-num" id="st-analyses">–</span><span class="stat-label">Analyses logged</span></div>
+    <div class="stat-tile"><span class="stat-num" id="st-desks">–</span><span class="stat-label">Desk observations</span></div>
+    <div class="stat-tile"><span class="stat-num stat-small" id="st-last">–</span><span class="stat-label">Last capture</span></div>
+  </div>
+</section>
+
+<section class="container-wide section-gap" aria-label="Saved runs">
+  <div class="toolbar">
+    <label class="visually-hidden" for="h-search">Search by source or run ID</label>
+    <input id="h-search" class="input search" type="search" placeholder="Search source or run ID" autocomplete="off">
+    <div class="segmented" role="group" aria-label="Filter by input type" id="h-kind">
+      <button type="button" data-kind="" aria-pressed="true">All</button>
+      <button type="button" data-kind="image" aria-pressed="false">Images</button>
+      <button type="button" data-kind="video" aria-pressed="false">Video</button>
+    </div>
+  </div>
+  <p class="meta results-line" id="h-count" aria-live="polite"></p>
+  <div class="run-grid" id="run-grid"></div>
+  <div class="load-more"><button id="h-more" class="btn btn-secondary" type="button" hidden>Load more</button></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

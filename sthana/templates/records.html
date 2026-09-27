@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Records · {{ app_name }}{% endblock %}
+
+{% block content %}
+<header class="container-wide page-head">
+  <div>
+    <p class="eyebrow">Records</p>
+    <h1 class="page-title">Plain CSV.</h1>
+    <p class="page-sub">Every observation, searchable. Open any row to see the frame it came from.</p>
+  </div>
+</header>
+
+<section class="container-wide" aria-label="Records">
+  <div class="toolbar">
+    <div class="segmented" role="tablist" aria-label="Table" id="rec-tabs">
+      <button type="button" role="tab" data-table="desks" aria-selected="true">Desk observations</button>
+      <button type="button" role="tab" data-table="runs" aria-selected="false" tabindex="-1">Runs</button>
+      <button type="button" role="tab" data-table="events" aria-selected="false" tabindex="-1">Events</button>
+    </div>
+    <a class="btn btn-primary btn-sm" id="rec-download" href="/download/desks.csv">Download CSV</a>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-tools">
+      <div class="chips state-filter" id="rec-states" role="group" aria-label="Filter by seat state"></div>
+      <label class="visually-hidden" for="rec-search">Search</label>
+      <input id="rec-search" class="input search" type="search" placeholder="Search all columns" autocomplete="off">
+    </div>
+    <div class="table-wrap" tabindex="0" aria-label="Records table, scrollable">
+      <table class="table" id="rec-table" aria-describedby="rec-count"></table>
+    </div>
+    <div class="pager">
+      <p class="meta" id="rec-count" aria-live="polite"></p>
+      <div class="pager-controls">
+        <label class="meta" for="rec-per">Rows</label>
+        <select id="rec-per" class="select select-sm">
+          <option>25</option><option selected>50</option><option>100</option><option>250</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" id="rec-prev" type="button" aria-label="Previous page">‹</button>
+        <span class="meta" id="rec-page"></span>
+        <button class="btn btn-secondary btn-sm" id="rec-next" type="button" aria-label="Next page">›</button>
+      </div>
+    </div>
+  </div>
+  <p class="meta files-note">Stored in <span class="mono">outputs/</span>: desk_observations.csv, runs.csv, events.csv, and one folder per saved run in <span class="mono">outputs/runs/</span>.</p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/records.js') }}"></script>
+{% endblock %}

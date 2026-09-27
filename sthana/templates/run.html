@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Run {{ run_id }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div id="run-root" data-run-id="{{ run_id }}">
+  <header class="container-wide page-head run-head">
+    <div>
+      <a class="back-link" href="{{ url_for('history') }}">‹ History</a>
+      <h1 class="page-title run-title" id="r-title">Run</h1>
+      <p class="page-sub" id="r-sub"></p>
+    </div>
+    <nav class="run-nav" aria-label="Neighbouring runs">
+      <a class="btn btn-secondary btn-sm" id="r-prev" aria-disabled="true" href="#">‹ Older</a>
+      <a class="btn btn-secondary btn-sm" id="r-next" aria-disabled="true" href="#">Newer ›</a>
+    </nav>
+  </header>
+
+  <section class="container-wide">
+    <div class="card run-viewer">
+      <div class="card-head">
+        <div class="segmented" role="group" aria-label="Image version" id="r-view">
+          <button type="button" data-view="annotated" aria-pressed="true">Annotated</button>
+          <button type="button" data-view="original" aria-pressed="false">Original</button>
+        </div>
+        <div class="chips" id="r-chips"></div>
+      </div>
+      <a id="r-img-link" href="#" target="_blank" rel="noopener" class="run-img-wrap">
+        <img id="r-img" alt="" decoding="async">
+      </a>
+      <div class="run-files" id="r-files"></div>
+    </div>
+  </section>
+
+  <section class="container-wide section-gap" aria-labelledby="r-desks-title">
+    <div class="toolbar">
+      <h2 class="section-title" id="r-desks-title">Desks.</h2>
+      <div class="segmented" role="group" aria-label="Filter desks by state" id="r-filter"></div>
+    </div>
+    <div class="desk-detail-grid" id="r-desks"></div>
+  </section>
+</div>
+
+<!-- full-size image viewer -->
+<dialog class="lightbox" id="lightbox" aria-label="Image preview">
+  <form method="dialog"><button class="lightbox-close" aria-label="Close">×</button></form>
+  <img id="lightbox-img" alt="">
+  <p id="lightbox-cap" class="meta"></p>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/run.js') }}"></script>
+{% endblock %}

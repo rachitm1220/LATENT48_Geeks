@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Live · {{ app_name }}{% endblock %}
+
+{% block content %}
+<header class="container-wide page-head">
+  <div>
+    <p class="eyebrow">Live</p>
+    <h1 class="page-title">Live monitor.</h1>
+    <p class="page-sub">Every desk, colour-coded in real time.</p>
+  </div>
+  <div class="clock">
+    <div id="clock-time" class="clock-time">--:--:--</div>
+    <div id="clock-offset" class="meta"></div>
+  </div>
+</header>
+
+<div class="container-wide"><div id="alerts" class="alerts" aria-live="polite"></div></div>
+
+<section class="container-wide monitor-grid">
+  <!-- ---------- Viewer + inputs ---------- -->
+  <div class="card viewer-card">
+    <div class="card-head">
+      <h2 class="card-title">Camera view</h2>
+      <span id="frame-info" class="meta"></span>
+    </div>
+
+    <div class="viewer">
+      <canvas id="view" role="img" aria-label="Latest analyzed frame with desks coloured by seat state" hidden></canvas>
+      <div id="placeholder" class="viewer-empty">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="11" width="38" height="28" rx="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="25" r="7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="16" y="6" width="16" height="6" rx="2" fill="currentColor" opacity=".5"/></svg>
+        <p class="ve-title">No frame yet.</p>
+        <p>Upload an image or play a video to begin.</p>
+      </div>
+      <div id="busy" class="busy" hidden><span class="spinner" aria-hidden="true"></span> Analyzing…</div>
+    </div>
+
+    <div class="viewer-bar">
+      <label class="check"><input type="checkbox" id="show-persons" checked><span>People</span></label>
+      <label class="check"><input type="checkbox" id="show-objects" checked><span>Objects</span></label>
+      <span class="spacer"></span>
+      <a id="last-run-link" class="link-more small" href="{{ url_for('history') }}" hidden>Saved run</a>
+      <a class="link-more small" href="/api/annotated" target="_blank" rel="noopener">Annotated image</a>
+    </div>
+
+    <div class="input-tabs">
+      <div class="segmented" role="tablist" aria-label="Input source">
+        <button type="button" role="tab" id="tab-image" aria-selected="true" aria-controls="panel-image">Images</button>
+        <button type="button" role="tab" id="tab-video" aria-selected="false" aria-controls="panel-video" tabindex="-1">Video</button>
+      </div>
+    </div>
+
+    <div id="panel-image" class="input-panel" role="tabpanel" aria-labelledby="tab-image">
+      <div class="controls">
+        <label class="btn btn-primary file-btn">Upload image
+          <input type="file" id="upload" accept="image/*" class="visually-hidden">
+        </label>
+        <select id="image-select" class="select" aria-label="Image from the data folder"><option value="">Data folder</option></select>
+        <button id="btn-process" class="btn btn-secondary" type="button">Analyze</button>
+        <button id="btn-next" class="btn btn-secondary" type="button">Next image</button>
+        <button id="btn-camera" class="btn btn-secondary" type="button">Camera frame</button>
+      </div>
+      <div class="controls">
+        <label class="check"><input type="checkbox" id="autoplay"><span>Auto-play folder every</span></label>
+        <input type="number" id="autoplay-sec" value="5" min="1" class="input num" aria-label="Auto-play interval in seconds">
+        <span class="meta">seconds</span>
+      </div>
+    </div>
+
+    <div id="panel-video" class="input-panel" role="tabpanel" aria-labelledby="tab-video" hidden>
+      <div class="controls">
+        <label class="btn btn-primary file-btn">Upload video
+          <input type="file" id="video-upload" accept="video/*" class="visually-hidden">
+        </label>
+        <select id="video-select" class="select" aria-label="Video source"><option value="">Data folder videos</option></select>
+        <button id="btn-video-start" class="btn btn-secondary" type="button">Play</button>
+        <button id="btn-video-pause" class="btn btn-secondary" type="button" disabled>Pause</button>
+        <button id="btn-video-stop" class="btn btn-secondary" type="button" disabled>Stop</button>
+      </div>
+      <div class="controls">
+        <label class="inline-field">Analyze every
+          <input type="number" id="video-sample" value="2" step="0.5" min="0.2" class="input num"> s</label>
+        <label class="inline-field">Speed
+          <select id="video-speed" class="select">
+            <option value="1">1×</option><option value="2">2×</option><option value="5">5×</option>
+            <option value="10">10×</option><option value="30">30×</option>
+          </select></label>
+      </div>
+      <div class="controls">
+        <label class="check" title="A bag left for {{ grace_minutes }} min in the recording turns green at that mark, at any speed"><input type="checkbox" id="video-sync" checked><span>Timers follow video time</span></label>
+        <label class="check"><input type="checkbox" id="video-loop"><span>Loop</span></label>
+        <label class="check"><input type="checkbox" id="video-reset" checked><span>Reset seats on start</span></label>
+      </div>
+      <div class="controls">
+        <label class="inline-field">Recording starts at
+          <input type="time" id="video-start" class="input" aria-describedby="video-start-help"></label>
+        <span class="meta" id="video-start-help">Optional. Gives history real times of day (with "Timers follow video time").</span>
+      </div>
+      <div id="video-status" class="video-status" hidden></div>
+    </div>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </div>
+
+  <!-- ---------- Seats ---------- -->
+  <aside class="side" aria-label="Seat status">
+    <div id="summary" class="stat-tiles"></div>
+    <div class="card seats-card">
+      <div class="card-head">
+        <h2 class="card-title">Seats</h2>
+        <span class="meta">Select one to use the timer</span>
+      </div>
+      <div id="desk-list" class="desk-list"></div>
+    </div>
+  </aside>
+</section>
+
+<!-- ---------- Demo controls ---------- -->
+<section class="container-wide section-gap" aria-labelledby="demo-title">
+  <h2 id="demo-title" class="section-title">Demo controls.</h2>
+  <p class="page-sub">Show the {{ grace_minutes }}-minute rule without waiting {{ grace_minutes }} minutes.</p>
+  <div class="demo-grid">
+    <div class="card demo-card">
+      <p class="demo-num">29<span>:00</span></p>
+      <h3 class="card-title">Belongings timer</h3>
+      <p class="meta">How long an orange seat has been unattended. 29 turns it green in one minute.</p>
+      <div class="controls">
+        <select id="demo-desk" class="select" aria-label="Seat"></select>
+        <input type="number" id="demo-min" value="29" step="0.5" min="0" class="input num" aria-label="Minutes elapsed">
+        <button id="btn-set-elapsed" class="btn btn-primary" type="button">Set timer</button>
+      </div>
+    </div>
+    <div class="card demo-card">
+      <p class="demo-num" id="grace-display">{{ grace_minutes }}<span> min</span></p>
+      <h3 class="card-title">Grace period</h3>
+      <p class="meta">How long belongings may hold a seat.</p>
+      <div class="controls">
+        <input type="number" id="grace" value="{{ grace_minutes }}" step="0.5" min="0.5" class="input num" aria-label="Grace period in minutes">
+        <button id="btn-grace" class="btn btn-secondary" type="button">Save</button>
+      </div>
+    </div>
+    <div class="card demo-card">
+      <p class="demo-num">+30<span> min</span></p>
+      <h3 class="card-title">Fast-forward</h3>
+      <p class="meta">Moves the clock for every seat at once.</p>
+      <div class="controls">
+        <button class="btn btn-secondary ff" data-min="1" type="button">+1 min</button>
+        <button class="btn btn-secondary ff" data-min="5" type="button">+5 min</button>
+        <button class="btn btn-secondary ff" data-min="30" type="button">+30 min</button>
+        <button id="btn-reset" class="btn btn-danger" type="button">Reset</button>
+      </div>
+    </div>
+    <div class="card demo-card">
+      <p class="demo-num" id="clock-display">08<span>:00</span></p>
+      <h3 class="card-title">Set clock</h3>
+      <p class="meta">Record the next frames at a time of day. Analyze one image at 08:00, another at 10:00, and so on to build the Map time-lapse.</p>
+      <div class="controls">
+        <input type="time" id="clock-set" value="08:00" class="input" aria-label="Clock time">
+        <button id="btn-clock-set" class="btn btn-secondary" type="button">Set clock</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Activity ---------- -->
+<section class="container-wide section-gap" aria-labelledby="events-title">
+  <div class="card">
+    <div class="card-head">
+      <h2 id="events-title" class="card-title">Activity</h2>
+      <a class="link-more small" href="{{ url_for('records') }}?t=events">All events</a>
+    </div>
+    <ul id="events" class="events"></ul>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/monitor.js') }}"></script>
+{% endblock %}
