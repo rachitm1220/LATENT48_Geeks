@@ -20,7 +20,7 @@ no person, no belongings              -> AVAILABLE           green
 ## Run it
 
 ```bash
-cd seat_monitor
+cd Sthana
 python -m venv venv
 venv\Scripts\activate          # Windows  (source venv/bin/activate on macOS/Linux)
 pip install -r requirements.txt
