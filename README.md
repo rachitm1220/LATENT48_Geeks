@@ -4,7 +4,7 @@
 | --- | --- |
 | **Total Row Count (Images)** | 160 |
 | **Collection Window** | `[September 25th 2026 to September 26th 2026]` |
-| **Sources** | `[e.g., Captured via smartphone cameras in central library and reading rooms in hostel]` |
+| **Sources** | `Captured via smartphone cameras in central library and reading rooms in hostel` |
 | **Observed vs. Inferred vs. Synthetic** | **160** Observed (Real-world data) |
 
 
