@@ -22,6 +22,7 @@ All data was manually self-labeled to ensure ground-truth quality. The annotatio
 * **Desk Detection:** ~100 images labeled
 * **Object Detection & Classification:** 160 images labeled
 
+The sample of the collected data along with sample of the manually labelled desk detetcion, manuallly labelled object detection images and other images are also provided in finalDatasetGithub folder 
 ---
 
 # Sthāna (स्थान)
