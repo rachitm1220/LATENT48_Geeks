@@ -1,3 +1,29 @@
+### Dataset Overview & Statistics
+
+| Metric | Details |
+| --- | --- |
+| **Total Row Count (Images)** | 160 |
+| **Collection Window** | `[September 25th 2026 to September 26th 2026]` |
+| **Sources** | `[e.g., Captured via smartphone cameras in central library and reading rooms in hostel]` |
+| **Observed vs. Inferred vs. Synthetic** | **160** Observed (Real-world data) |
+
+
+
+**0** Inferred (No machine-generated pseudo-labels)
+
+
+
+**0** Synthetic (No generated/rendered images) |
+
+### Annotation Breakdown
+
+All data was manually self-labeled to ensure ground-truth quality. The annotations are split across two primary computer vision tasks:
+
+* **Desk Detection:** ~100 images labeled
+* **Object Detection & Classification:** 160 images labeled
+
+---
+
 # Sthāna (स्थान)
 
 *Sanskrit: a place, a seat.* Real-time library desk availability from three vision models and one rule.
